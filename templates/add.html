@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>SOTPAL</title>
+    </head>
+    <body>
+        <h5>Some of these people are lying!</h5>
+        <input type="text", maxlength="100" id="inputField"/>
+        <button id="submit">Add entry</button>
+        <a href="/draw/%ID%">Draw!</a>
+        <script>
+            const RoomID = "%ID%";
+            let btn = document.getElementById("submit")
+            btn.addEventListener('click', onClick)
+            function onClick(evt) {
+                let e = document.getElementById("inputField")
+                let text = e.value
+                if (text.trim() === "") {
+                    return;
+                }
+
+                fetch('/api/put',{
+                    method: "POST",
+                    headers: {roomID: RoomID, entry: text}
+                }).then(() => {
+                    e.value = "";
+                    alert("Success!");
+                });
+            }
+        </script>
+    </body>
+</html>

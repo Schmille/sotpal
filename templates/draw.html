@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <title>SOTPAL</title>
+    </head>
+    <body>
+        <h5>Some of these people are lying!</h5>
+        <span id="output">Nothing drawn yet</span>
+        <span id="count">There are 0 entries left</span>
+        <button id="submit">Draw</button>
+        <a href="/add/%ID%">Add!</a>
+        <script>
+            const RoomID = "%ID%";
+            let btn = document.getElementById("submit");
+            let count = document.getElementById("count");
+
+            btn.addEventListener('click', onClick)
+            function onClick(evt) {
+                let e = document.getElementById("output")
+                fetch('/api/draw/' + RoomID).then((data) => {
+                    data.text().then((t) => {
+                        if(t === "") {
+                            e.innerText = "Nothing drawn";
+                            return;
+                        }
+                        e.innerText = t
+                        updateCount()
+                    });
+                });
+            }
+
+            function updateCount() {
+                fetch('/api/count/' + RoomID).then((data) => {
+                    data.text().then((t) => {
+                        count.innerText = "There are " + t + " entries left";
+                    });
+                });
+            }
+            updateCount()
+        </script>
+    </body>
+</html>
