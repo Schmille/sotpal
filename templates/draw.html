@@ -1,15 +1,22 @@
 <html>
     <head>
         <title>SOTPAL</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <style>
+            body {
+                background-color: dimgrey;
+            }
+        </style>
     </head>
     <body>
         <h5>Some of these people are lying!</h5>
-        <span id="output">Nothing drawn yet</span>
-        <span id="count">There are 0 entries left</span>
-        <button id="submit">Draw</button>
-        <a href="/add/%ID%">Add!</a>
+        <span id="output">Nothing drawn yet</span><br>
+        <span id="count">There are 0 entries left</span><br>
+        <button id="submit" class="waves-effect waves-light btn-small">Draw</button>
+        <a href="/add/{{.ID}}" class="waves-effect waves-light btn-small">Add!</a>
         <script>
-            const RoomID = "%ID%";
+            const RoomID = "{{.ID}}";
             let btn = document.getElementById("submit");
             let count = document.getElementById("count");
 

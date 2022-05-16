@@ -1,14 +1,21 @@
 <html>
     <head>
         <title>SOTPAL</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <style>
+            body {
+                background-color: dimgrey;
+            }
+        </style>
     </head>
     <body>
         <h5>Some of these people are lying!</h5>
         <input type="text", maxlength="100" id="inputField"/>
-        <button id="submit">Add entry</button>
-        <a href="/draw/%ID%">Draw!</a>
+        <button id="submit" class="waves-effect waves-light btn-small">Add entry</button>
+        <a href="/draw/{{.ID}}" class="waves-effect waves-light btn-small">Draw!</a>
         <script>
-            const RoomID = "%ID%";
+            const RoomID = "{{.ID}}";
             let btn = document.getElementById("submit")
             btn.addEventListener('click', onClick)
             function onClick(evt) {

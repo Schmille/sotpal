@@ -2,7 +2,7 @@ package main
 
 import (
     "github.com/gin-gonic/gin"
-    "io/ioutil"
+    "html/template"
     "math/rand"
     "net/http"
     "strconv"
@@ -23,6 +23,10 @@ type RoomMap struct {
     mutex sync.Mutex
 }
 
+type TemplateContext struct {
+    ID  string
+}
+
 var Rooms = NewRoomMap()
 
 func main() {
@@ -35,10 +39,10 @@ func main() {
     router.GET("/error", displayErrorPage)
     apiRoutes := router.Group("/api")
     {
-        apiRoutes.GET("/create", createRoom)
-        apiRoutes.POST("/put", putEntry)
-        apiRoutes.GET("/count/:roomID", getCount)
-        apiRoutes.GET("/draw/:roomID", drawEntry)
+        apiRoutes.GET("/create", apiCreateRoom)
+        apiRoutes.POST("/put", apiPutEntry)
+        apiRoutes.GET("/count/:roomID", apiGetCount)
+        apiRoutes.GET("/draw/:roomID", apiDrawEntry)
     }
 
     router.Run()
@@ -62,14 +66,12 @@ func displayAddPage(ctx *gin.Context) {
         return
     }
 
-    content, err := ioutil.ReadFile("./templates/add.html")
+    tmp, err := template.ParseFiles("./templates/add.html")
     if err != nil {
         ctx.Redirect(http.StatusFound, "/error")
         return
     }
-    html := string(content)
-    html = strings.ReplaceAll(html, "%ID%", id)
-    ctx.Writer.Write([]byte(html))
+    tmp.Execute(ctx.Writer, NewTemplateContext(id))
 }
 
 func displayDrawPage(ctx *gin.Context) {
@@ -82,17 +84,15 @@ func displayDrawPage(ctx *gin.Context) {
         return
     }
 
-    content, err := ioutil.ReadFile("./templates/draw.html")
+    tmp, err := template.ParseFiles("./templates/draw.html")
     if err != nil {
         ctx.Redirect(http.StatusFound, "/error")
         return
     }
-    html := string(content)
-    html = strings.ReplaceAll(html, "%ID%", id)
-    ctx.Writer.Write([]byte(html))
+    tmp.Execute(ctx.Writer, NewTemplateContext(id))
 }
 
-func createRoom(ctx *gin.Context) {
+func apiCreateRoom(ctx *gin.Context) {
     Rooms.mutex.Lock()
     defer Rooms.mutex.Unlock()
 
@@ -110,7 +110,7 @@ func createRoom(ctx *gin.Context) {
     ctx.Redirect(http.StatusFound, "/add/" + id)
 }
 
-func putEntry(ctx *gin.Context) {
+func apiPutEntry(ctx *gin.Context) {
     Rooms.mutex.Lock()
     defer Rooms.mutex.Unlock()
 
@@ -129,7 +129,7 @@ func putEntry(ctx *gin.Context) {
     ctx.Status(http.StatusOK)
 }
 
-func getCount(ctx *gin.Context) {
+func apiGetCount(ctx *gin.Context) {
     Rooms.mutex.Lock()
     defer Rooms.mutex.Unlock()
 
@@ -147,7 +147,7 @@ func getCount(ctx *gin.Context) {
     ctx.String(http.StatusOK, resp)
 }
 
-func drawEntry(ctx *gin.Context) {
+func apiDrawEntry(ctx *gin.Context) {
     Rooms.mutex.Lock()
     defer Rooms.mutex.Unlock()
     id := ctx.Param("roomID")
@@ -213,4 +213,10 @@ func removeFromSlice(slice []string, index int) []string {
 
 func NewRoomMap() RoomMap {
     return RoomMap{rooms: make(map[string]Room)}
+}
+
+func NewTemplateContext(ID string) TemplateContext {
+    return TemplateContext{
+        ID:  ID,
+    }
 }
