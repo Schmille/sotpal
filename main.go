@@ -39,6 +39,7 @@ func main() {
     rand.Seed(time.Now().Unix())
 
     router := gin.Default()
+    router.SetTrustedProxies(nil)
     addRateLimit(router)
     go cleanDeadRooms()
 
