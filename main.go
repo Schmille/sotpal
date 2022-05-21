@@ -17,6 +17,7 @@ import (
 
 const RoomIDLength = 32
 const RateLimitString = "5-S"
+const DeadRoomCleanupRate = 2 * time.Hour
 
 type Room struct {
     entries []string
@@ -39,6 +40,7 @@ func main() {
 
     router := gin.Default()
     addRateLimit(router)
+    go cleanDeadRooms()
 
     router.GET("/", displayIndex)
     router.GET("/add/:roomID", displayAddPage)
@@ -208,6 +210,26 @@ func getRandomId(idLength int) string {
     }
 
     return sb.String()
+}
+
+func cleanDeadRooms() {
+    for true {
+        Rooms.mutex.Lock()
+
+        deletions := make([]string, 0)
+        for k, v := range Rooms.rooms {
+            if time.Now().Sub(v.lastUsed) >= DeadRoomCleanupRate {
+                deletions = append(deletions, k)
+            }
+        }
+
+        for _, k := range deletions {
+            delete(Rooms.rooms, k)
+            log.Printf("deleted %s\n", k)
+        }
+        Rooms.mutex.Unlock()
+        time.Sleep(1 * time.Minute)
+    }
 }
 
 func removeFromSlice(slice []string, index int) []string {
