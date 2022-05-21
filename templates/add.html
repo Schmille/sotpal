@@ -17,21 +17,34 @@
         <a href="/draw/{{.ID}}" class="waves-effect waves-light btn-small">Draw!</a>
         <script>
             const RoomID = "{{.ID}}";
-            let btn = document.getElementById("submit")
-            btn.addEventListener('click', onClick)
+            let btn = document.getElementById("submit");
+            let input = document.getElementById("inputField");
+
+            btn.addEventListener('click', onClick);
+            input.addEventListener('keyup', onEnterPress);
             function onClick(evt) {
+                add()
+            }
+            function onEnterPress(evt) {
+                if (evt.key === 'Enter' || evt.keyCode === 13) {
+                    add()
+                }
+            }
+            function add() {
                 let e = document.getElementById("inputField")
                 let text = e.value
                 if (text.trim() === "") {
                     return;
                 }
-
                 fetch('/api/put',{
                     method: "POST",
                     headers: {roomID: RoomID, entry: text}
-                }).then(() => {
+                }).then((res) => {
+                    if(res.status != 200) {
+                        alert("Error!");
+                        return
+                    }
                     e.value = "";
-                    alert("Success!");
                 });
             }
         </script>
