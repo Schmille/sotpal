@@ -2,7 +2,11 @@ package main
 
 import (
     "github.com/gin-gonic/gin"
+    "github.com/ulule/limiter/v3"
+    gin2 "github.com/ulule/limiter/v3/drivers/middleware/gin"
+    "github.com/ulule/limiter/v3/drivers/store/memory"
     "html/template"
+    "log"
     "math/rand"
     "net/http"
     "strconv"
@@ -12,6 +16,7 @@ import (
 )
 
 const RoomIDLength = 32
+const RateLimitString = "5-S"
 
 type Room struct {
     entries []string
@@ -31,7 +36,9 @@ var Rooms = NewRoomMap()
 
 func main() {
     rand.Seed(time.Now().Unix())
+
     router := gin.Default()
+    addRateLimit(router)
 
     router.GET("/", displayIndex)
     router.GET("/add/:roomID", displayAddPage)
@@ -46,6 +53,17 @@ func main() {
     }
 
     router.Run()
+}
+
+func addRateLimit(g *gin.Engine) {
+    rate, err := limiter.NewRateFromFormatted(RateLimitString)
+    if err != nil {
+        log.Fatal(err)
+    }
+    store := memory.NewStore()
+    instance := limiter.New(store, rate)
+    middleware := gin2.NewMiddleware(instance)
+    g.Use(middleware)
 }
 
 func displayIndex(ctx *gin.Context) {
